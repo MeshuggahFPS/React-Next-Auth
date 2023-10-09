@@ -1,11 +1,6 @@
 'use client';
 
 import { ChangeEvent, FormEvent, useState, FocusEvent } from 'react';
-import * as Yup from 'yup';
-
-interface ValidationSchema {
-    [key: string]: Yup.Schema<any>;
-}
 
 interface FormState<T> {
     [key: string]: T;
@@ -13,17 +8,48 @@ interface FormState<T> {
 
 interface Form<T> {
     formData: T;
-    errors: FormState<string>; // Update the error type to string
+    errors: FormState<string>;
     isValid: boolean;
     handleChange: (name: string, event: ChangeEvent<HTMLInputElement>) => void;
     handleSubmit: (event: FormEvent<HTMLFormElement>) => void;
-    handleBlur: (name: string, event: FocusEvent<HTMLInputElement>)=> void;
+    handleBlur: (name: string, event: FocusEvent<HTMLInputElement>) => void;
 }
 
+const validateForm = (formData: FormState<string>) => {
+    const errors: FormState<string> = {};
+
+    if (!formData.name) {
+        errors.name = "Name is required";
+    }
+
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    if (!formData.email) {
+        errors.email = "Email is required";
+    } else if (!emailRegex.test(formData.email)) {
+        errors.email = "Invalid email address";
+    }
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d{2,})(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+    if (!formData.password) {
+        errors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+        errors.password = "Password must be at least 6 characters long";
+    } else if (!passwordRegex.test(formData.password)) {
+        errors.password = "Password must contain at least 2 numbers and a special character";
+    }
+
+    if (!formData.confirmPassword) {
+        errors.confirmPassword = "Confirm password is required";
+    } else if (formData.confirmPassword !== formData.password) {
+        errors.confirmPassword = "Passwords do not match";
+    }
+
+    return errors;
+};
 const useForm = <T>(
-    validationSchema: ValidationSchema,
     initialValues: T,
     submitCallback: (formData: T) => void,
+    skipValidation: boolean = false, // Add a new parameter to skip validation
 ): Form<T> => {
     const [formData, setFormData] = useState<T>(initialValues);
     const [errors, setErrors] = useState<FormState<string>>({});
@@ -33,49 +59,30 @@ const useForm = <T>(
         setFormData({ ...formData, [name]: e.target.value });
     };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const schema = Yup.object().shape(validationSchema);
-
-        schema
-            .validate(formData, { abortEarly: false })
-            .then(() => {
-                setIsValid(true);
-                submitCallback(formData);
-            })
-            .catch((validationErrors: Yup.ValidationError) => {
-                const newErrors: FormState<string> = {};
-
-                validationErrors.inner.forEach((error) => {
-                    if (error.path) {
-                        newErrors[error.path] = error.message;
-                    }
-                });
-
-                setErrors(newErrors);
-                setIsValid(false);
-            });
+    const handleBlur = (name: string, e: FocusEvent<HTMLInputElement>) => {
+        // Validate the specific field onBlur, but only if skipValidation is false
+        if (!skipValidation) {
+            const fieldValue = formData[name as keyof T];
+            const validationErrors = validateForm({ ...formData, [name]: fieldValue } as FormState<string>);
+            setErrors(validationErrors);
+        }
     };
 
-    const handleBlur = async (name: string, event: FocusEvent<HTMLInputElement>) => {
-        try {
-          const fieldSchema = validationSchema[name];
-          await fieldSchema.validate(event.target.value);
-          setErrors({ ...errors, [name]: '' });
-      
-          const updatedFormData = { ...formData, [name]: event.target.value };
-      
-          const schema = Yup.object().shape(validationSchema);
-          await schema.validate(updatedFormData, { abortEarly: false });
-      
-          setIsValid(true);
-        } catch (error) {
-          if (error instanceof Yup.ValidationError) {
-            setErrors({ ...errors, [name]: error.message });
-            setIsValid(false);
-          }
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        // Validate the entire form before submission, but only if skipValidation is false
+        if (!skipValidation) {
+            const validationErrors = validateForm(formData as FormState<string>);
+            setErrors(validationErrors);
+            setIsValid(Object.keys(validationErrors).length === 0);
         }
-      };
+
+        // If the form is valid or skipValidation is true, call the submitCallback
+        if (isValid || skipValidation) {
+            submitCallback(formData);
+        }
+    };
 
     return {
         formData,

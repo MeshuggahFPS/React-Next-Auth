@@ -1,6 +1,6 @@
 import { ChangeEvent, FocusEvent } from "react";
 
-type TInput = "text" | "textarea" | "select" | "password" | "newPassword" | "date" | "email";
+export type TInput = "text" | "textarea" | "select" | "password" | "newPassword" | "date" | "email";
 
 interface IInputProps<T> {
     label: string;

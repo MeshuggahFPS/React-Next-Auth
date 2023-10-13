@@ -1,25 +1,18 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { AuthContext } from '../context/authentication/Provider';
-import Loader from '../components/loader/loader';
 
-const withAuthentication = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
-    const WrappedComponentWithAuth = (props: P) => {
+const withAuthentication = <P extends object>(WrappedComponent: React.ComponentType<P>, options?: { redirectPath?: string }) => {
+    const WrappedComponentWithAuth: React.FC<P> = (props) => {
         const { isAuthenticated } = useContext(AuthContext);
         const router = useRouter();
-        const [isLoading, setIsLoading] = useState(true);
 
         useEffect(() => {
             if (!isAuthenticated) {
-                router.push('/login');
-            } else {
-                setIsLoading(false);
+                router.push(options?.redirectPath || '/login');
             }
         }, [isAuthenticated, router]);
 
-        if (isLoading) {
-            return <Loader />
-        }
 
         return <WrappedComponent {...props} />;
     };

@@ -1,7 +1,7 @@
 import React, { ChangeEvent, useState } from "react";
 import IInputProps from "./input.types";
 import { Container } from "./input.styling";
-import ErrorMessage from "../error/Error";
+import ErrorMessage from "../error/Feedback";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
@@ -54,7 +54,7 @@ export const Input = <T extends {}>({
                     )}
                 </div>
             </div>
-            {error && <ErrorMessage message={error} />} {/* Show error only if it exists for the current input */}
+            {error && <ErrorMessage type="error" message={error} />}
         </Container>
     );
 };

@@ -7,7 +7,13 @@ const Button: FC<IButtonProps> = ({ label, type, disabled, navigate, style, onCl
 
   const buttonStyle = disabled ? buttonStyles['disabled'] : buttonStyles[style || 'primary'];
 
-  const buttonContent = (
+  return navigate ? (
+    <Link href={navigate} type={type}
+      className={buttonStyle}
+      onClick={onClick}>
+      {label}
+    </Link>
+  ) : (
     <button
       type={type}
       disabled={disabled}
@@ -16,14 +22,6 @@ const Button: FC<IButtonProps> = ({ label, type, disabled, navigate, style, onCl
     >
       {label}
     </button>
-  );
-
-  return navigate ? (
-    <Link href={navigate}>
-      {buttonContent}
-    </Link>
-  ) : (
-    buttonContent
   );
 };
 

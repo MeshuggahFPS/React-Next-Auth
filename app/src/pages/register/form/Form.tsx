@@ -6,20 +6,19 @@ import useForm from '@/src/helpers/useForm';
 import Button from '@/src/components/button/Button';
 import { IRegisterCredentials } from './Form.types';
 import { TInput } from "@/src/components/input/input.types";
+import FeedbackMessage from '@/src/components/error/Feedback';
 
 export const RegisterForm = () => {
-    const { register } = useContext(AuthContext);
+    const { register, feedback } = useContext(AuthContext);
 
     const {
         formData,
         errors,
-        isValid,
         handleChange,
         handleBlur,
         handleSubmit,
-    } = useForm<IRegisterCredentials>(initalState, register);
+    } = useForm<IRegisterCredentials>(initalState, register, 'register');
 
-    // Function to handle input fields
     const renderInputField = (
         label: string,
         name: keyof IRegisterCredentials,
@@ -46,8 +45,11 @@ export const RegisterForm = () => {
                     {renderInputField('Email', 'email', 'email', true)}
                     {renderInputField('Password', 'password', 'password', true)}
                     {renderInputField('Confirm Password', 'confirmPassword', 'password', true)}
-                     <Button type={"submit"} label={"Register"} style={"submit"} disabled={!isValid} />
-                     <Button type="button" navigate="/login" label="Login" style="secondary" />
+                    {feedback && <FeedbackMessage type={feedback.type} message={feedback.message} />}
+                    <div className="flex justify-between gap-10">
+                        <Button type={"button"} navigate={"/login"} label={"Login"} style={"secondary"} />
+                        <Button type={"submit"} label={"Register"} style={"primary"} />
+                    </div>
                 </form>
             </div>
         </div>

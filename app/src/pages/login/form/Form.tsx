@@ -6,18 +6,18 @@ import Button from '@/src/components/button/Button';
 import useForm from '@/src/helpers/useForm';
 import { AuthContext } from '@/src/context/authentication/Provider';
 import { TInput } from '@/src/components/input/input.types';
+import FeedbackMessage from '@/src/components/error/Feedback';
 
 export const LoginForm = () => {
-  const { login, reset } = useContext(AuthContext);
+  const { login, reset, feedback } = useContext(AuthContext);
 
   const {
     formData,
     errors,
-    isValid,
     handleBlur,
     handleChange,
     handleSubmit,
-  } = useForm<ILoginCredentials>(initialState, login, true); // Pass true to skip validation
+  } = useForm<ILoginCredentials>(initialState, login, 'login');
 
   const renderInputField = (
     label: string,
@@ -43,10 +43,11 @@ export const LoginForm = () => {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-2">
           {renderInputField('Email', 'email', 'email', true)}
           {renderInputField('Password', 'password', 'password', true)}
-          <Button type={"submit"} label={"Login"} disabled={isValid} style={"primary"} />
-          <div className="flex justify-between gap-20">
-            <Button type="button" navigate="/register" label="Register" style="secondary" />
+          {feedback && <FeedbackMessage type={feedback.type} message={feedback.message} />}
+          <div className="flex justify-between gap-10">
+            <Button type={"button"} navigate={"/register"} label={"Register"} style={"secondary"} />
             <Button type={"button"} label={"Reset"} style={"submit"} onClick={reset} />
+            <Button type={"submit"} label={"Login"} style={"primary"} />
           </div>
         </form>
       </div>

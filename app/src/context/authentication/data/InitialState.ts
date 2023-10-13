@@ -1,13 +1,16 @@
-import IAuthenticationState from "../types/Authentication.types"
-import IUser from "../types/User.types"
+import { IAuthContext } from "../types/Provider.types"
 
-const AuthenticationState: IAuthenticationState = {
+const initialValues: IAuthContext = {
     user: null,
-    hasLoaded: false,
-    jwt: null,
-    handleLogin: (user: IUser) => {},
-    handleLogout: () => {},
-    handleRegister: (user: IUser) => {},
+    feedback: {
+        type: null,
+        message: ''
+    },
+    isAuthenticated: false,
+    login: async () => { },
+    logout: async () => { },
+    register: async () => { },
+    reset: async () => { },
 }
 
-export default AuthenticationState
+export default initialValues

@@ -14,7 +14,7 @@ const Register = () => {
       router.push('/');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthenticated]);
   
   return <RegisterForm />
 }

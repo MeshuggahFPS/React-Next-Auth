@@ -1,7 +1,6 @@
-import React, { useContext, useEffect }  from 'react';
+import React, { useContext }  from 'react';
 import Button from '@/src/components/button/Button';
 import { AuthContext } from '@/src/context/authentication/Provider';
-import { useRouter } from 'next/router';
 import withAuthentication from '@/src/helpers/useRouteGuard';
 
 const Home = () => {

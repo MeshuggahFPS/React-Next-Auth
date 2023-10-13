@@ -6,6 +6,8 @@ interface FormState<T> {
     [key: string]: T;
 }
 
+type TForm = "login" | "register";
+
 interface Form<T> {
     formData: T;
     errors: FormState<string>;
@@ -15,10 +17,10 @@ interface Form<T> {
     handleBlur: (name: string, event: FocusEvent<HTMLInputElement>) => void;
 }
 
-const validateForm = (formData: FormState<string>) => {
+const validateForm = (formData: FormState<string>, formType: TForm) => {
     const errors: FormState<string> = {};
 
-    if (!formData.name) {
+    if (formType === "register" && !formData.name) {
         errors.name = "Name is required";
     }
 
@@ -38,9 +40,9 @@ const validateForm = (formData: FormState<string>) => {
         errors.password = "Password must contain at least 2 numbers and a special character";
     }
 
-    if (!formData.confirmPassword) {
+    if (formType === "register" && !formData.confirmPassword) {
         errors.confirmPassword = "Confirm password is required";
-    } else if (formData.confirmPassword !== formData.password) {
+    } else if (formType === "register" && formData.confirmPassword !== formData.password) {
         errors.confirmPassword = "Passwords do not match";
     }
 
@@ -49,6 +51,7 @@ const validateForm = (formData: FormState<string>) => {
 const useForm = <T>(
     initialValues: T,
     submitCallback: (formData: T) => void,
+    formType: TForm = "register",
     skipValidation: boolean = false, // Add a new parameter to skip validation
 ): Form<T> => {
     const [formData, setFormData] = useState<T>(initialValues);
@@ -63,20 +66,17 @@ const useForm = <T>(
         // Validate the specific field onBlur, but only if skipValidation is false
         if (!skipValidation) {
             const fieldValue = formData[name as keyof T];
-            const validationErrors = validateForm({ ...formData, [name]: fieldValue } as FormState<string>);
+            const validationErrors = validateForm({ ...formData, [name]: fieldValue } as FormState<string>, formType);
             setErrors(validationErrors);
         }
     };
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
         // Validate the entire form before submission, but only if skipValidation is false
-        if (!skipValidation) {
-            const validationErrors = validateForm(formData as FormState<string>);
-            setErrors(validationErrors);
-            setIsValid(Object.keys(validationErrors).length === 0);
-        }
+        const validationErrors = validateForm(formData as FormState<string>, formType);
+        setErrors(validationErrors);
+        setIsValid(Object.keys(validationErrors).length === 0);
 
         // If the form is valid or skipValidation is true, call the submitCallback
         if (isValid || skipValidation) {

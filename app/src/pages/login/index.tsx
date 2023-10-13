@@ -14,7 +14,7 @@ const Login = () => {
       router.push('/');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isAuthenticated]);
 
   return <LoginForm />
 }
